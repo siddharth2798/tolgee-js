@@ -14,33 +14,22 @@ jobs:
         with:
           node-version: '16.x'
 
-      - run: npm install -g npm@7.1
+      - uses: pnpm/action-setup@v2.0.1
+        name: Install pnpm
+        id: pnpm-install
+        with:
+          version: 7
+          run_install: false
 
-      - name: Cache .npm
+      - name: Cache pnpm store
         uses: actions/cache@v2
         with:
-          path: ~/.npm
-          key: npm-test-${{ runner.os }}-${{ github.sha }}
+          path: |
+            '/home/runner/.local/share/pnpm/store/v3'
+            '/home/runner/.cache/Cypress'
+          key: ${{ runner.os }}-pnpm-${{ hashFiles('**/pnpm-lock.yaml') }}
           restore-keys: |
-            npm-test-${{ runner.os }}-
-
-      - name: Cache root node_modules
-        uses: actions/cache@v2
-        with:
-          path: 'node_modules'
-          key: root-node-modules-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
-
-      - name: Cache packages node_modules
-        uses: actions/cache@v2
-        with:
-          path: 'packages/*/node_modules'
-          key: packages-node-modules-${{ runner.os }}-${{ hashFiles('packages/*/package-lock.json') }}
-
-      - name: Cache testapps node_modules
-        uses: actions/cache@v2
-        with:
-          path: 'testapps/*/node_modules'
-          key: testapps-node-modules-${{ runner.os }}-${{ hashFiles('testapps/*/package-lock.json') }}
+            ${{ runner.os }}-pnpm-
 
       - name: Turbo Cache
         id: turbo-cache
@@ -52,13 +41,13 @@ jobs:
             turbo-${{ github.job }}-
 
       - name: Install
-        run: npm run ci:install:root && npm run bootstrap
+        run: pnpm i
 
       - name: Build all packages
-        run: npm run ci:build
+        run: pnpm run build
 
       - name: Test
-        run: npm run ci:test
+        run: pnpm run test
 
   cypress-prepare:
     name: 'Cypress prepare'
@@ -70,41 +59,22 @@ jobs:
         with:
           node-version: '16.x'
 
-      - run: npm install -g npm@7.1
-
-      - name: Cache .npm
-        uses: actions/cache@v2
+      - uses: pnpm/action-setup@v2.0.1
+        name: Install pnpm
+        id: pnpm-install
         with:
-          path: ~/.npm
-          key: npm-cypress-${{ runner.os }}-${{ github.sha }}
-          restore-keys: |
-            npm-cypress-${{ runner.os }}-
+          version: 7
+          run_install: false
 
-      - name: Cache root node_modules
-        uses: actions/cache@v2
-        with:
-          path: 'node_modules'
-          key: root-node-modules-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
-
-      - name: Cache packages node_modules
-        uses: actions/cache@v2
-        with:
-          path: 'packages/*/node_modules'
-          key: packages-node-modules-${{ runner.os }}-${{ hashFiles('packages/*/package-lock.json') }}
-
-      - name: Cache testapps node_modules
-        uses: actions/cache@v2
-        with:
-          path: 'testapps/*/node_modules'
-          key: testapps-node-modules-${{ runner.os }}-${{ hashFiles('testapps/*/package-lock.json') }}
-
-      - name: Cache e2e node_modules
+      - name: Cache pnpm store
         uses: actions/cache@v2
         with:
           path: |
-            'e2e/node_modules'
-            '~/.cache/Cypress'
-          key: e2e-node-modules-${{ runner.os }}-${{ hashFiles('e2e/package-lock.json') }}
+            '/home/runner/.local/share/pnpm/store/v3'
+            '/home/runner/.cache/Cypress'
+          key: ${{ runner.os }}-pnpm-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-
 
       - name: Cache build results
         uses: actions/cache@v2
@@ -132,13 +102,13 @@ jobs:
             turbo-${{ github.job }}-
 
       - name: Install
-        run: npm run ci:init
+        run: pnpm i
 
       - name: Build
-        run: npm run ci:build
+        run: pnpm run build
 
       - name: Build e2e
-        run: npm run ci:build:e2e
+        run: pnpm run build:e2e
 
       - id: set-dirs
         run: echo "::set-output name=dirs::$(ls | jq -R -s -c 'split("\n")[:-1]')"
@@ -164,33 +134,22 @@ jobs:
         with:
           node-version: '16.x'
 
-      - run: npm install -g npm@7.1
-
-      - name: Cache root node_modules
-        uses: actions/cache@v2
+      - uses: pnpm/action-setup@v2.0.1
+        name: Install pnpm
+        id: pnpm-install
         with:
-          path: 'node_modules'
-          key: root-node-modules-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
+          version: 7
+          run_install: false
 
-      - name: Cache packages node_modules
-        uses: actions/cache@v2
-        with:
-          path: 'packages/*/node_modules'
-          key: packages-node-modules-${{ runner.os }}-${{ hashFiles('packages/*/package-lock.json') }}
-
-      - name: Cache testapps node_modules
-        uses: actions/cache@v2
-        with:
-          path: 'testapps/*/node_modules'
-          key: testapps-node-modules-${{ runner.os }}-${{ hashFiles('testapps/*/package-lock.json') }}
-
-      - name: Cache e2e node_modules
+      - name: Cache pnpm store
         uses: actions/cache@v2
         with:
           path: |
-            'e2e/node_modules'
-            '~/.cache/Cypress'
-          key: e2e-node-modules-${{ runner.os }}-${{ hashFiles('e2e/package-lock.json') }}
+            '/home/runner/.local/share/pnpm/store/v3'
+            '/home/runner/.cache/Cypress'
+          key: ${{ runner.os }}-pnpm-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-
 
       - name: Cache build results
         uses: actions/cache@v2
@@ -209,16 +168,16 @@ jobs:
           key: e2e-build-${{ runner.os }}-${{ github.sha }}
 
       - name: Install
-        run: npm run ci:init
+        run: pnpm i
 
       - name: Cypress
-        run: npm --prefix=e2e run start
+        run: pnpm --prefix=e2e run start
         env:
           E2E_APP: ${{matrix.app}}
 
       - name: Cypress cleanup
         if: always()
-        run: npm --prefix=e2e run services:stop
+        run: pnpm --prefix=e2e run services:stop
 
       - uses: actions/upload-artifact@v2
         if: failure()
@@ -238,20 +197,27 @@ jobs:
         with:
           node-version: '16.x'
 
-      - name: Cache .npm
+      - uses: pnpm/action-setup@v2.0.1
+        name: Install pnpm
+        id: pnpm-install
+        with:
+          version: 7
+          run_install: false
+
+      - name: Cache pnpm store
         uses: actions/cache@v2
         with:
-          path: ~/.npm
-          key: npm-${{ github.job }}-${{ github.sha }}
+          path: |
+            '/home/runner/.local/share/pnpm/store/v3'
+            '/home/runner/.cache/Cypress'
+          key: ${{ runner.os }}-pnpm-${{ hashFiles('**/pnpm-lock.yaml') }}
           restore-keys: |
-            npm-${{ github.job }}-
-
-      - run: npm install -g npm@7.1
+            ${{ runner.os }}-pnpm-
 
       - name: Install
-        run: npm run ci:install:root
+        run: pnpm i
         working-directory: ./
 
       - name: Eslint
-        run: npm run eslint
+        run: pnpm run eslint
         working-directory: ./
